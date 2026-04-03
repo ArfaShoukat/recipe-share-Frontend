@@ -34,7 +34,8 @@ const RecipeList = () => {
     if (!token) return null;
     try {
       const payload = JSON.parse(window.atob(token.split('.')[1]));
-      return payload.userId; 
+      // Check karein ke payload mein 'id' hai ya 'userId'
+      return payload.userId || payload.id; 
     } catch (e) { return null; }
   };
 
@@ -54,32 +55,40 @@ const RecipeList = () => {
   };
 
   return (
-    <div className="p-8 bg-[#111827] min-h-screen text-white">
+    <div className="p-4 md:p-8 pt-24 bg-[#111827] min-h-screen text-white">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-black mb-12 uppercase text-center">
+        <h2 className="text-2xl md:text-4xl font-black mb-12 uppercase text-center">
           {searchTerm ? `Results for "${searchTerm}"` : catTerm ? `${catTerm} Recipes` : 'Explore Recipes'}
         </h2>
         {filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {filteredRecipes.map(r => (
-              <motion.div key={r._id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#1f2937] rounded-3xl overflow-hidden relative border border-gray-800 shadow-xl group">
-                <img src={r.image} className="w-full h-56 object-cover" alt={r.title} />
-                {currentUserId && r.owner?.toString() === currentUserId?.toString() && (
-                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={(e) => { e.stopPropagation(); navigate(`/edit-recipe/${r._id}`); }} className="bg-black/70 p-2 rounded-full hover:bg-orange-500">✏️</button>
-                    <button onClick={(e) => handleDelete(e, r._id)} className="bg-black/70 p-2 rounded-full hover:bg-red-500">🗑️</button>
+            {filteredRecipes.map(r => {
+              // ID Match Logic Fix
+              const isOwner = currentUserId && (r.owner === currentUserId || r.owner?._id === currentUserId);
+              
+              return (
+                <motion.div key={r._id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#1f2937] rounded-3xl overflow-hidden relative border border-gray-800 shadow-xl group">
+                  <img src={r.image} className="w-full h-56 object-cover" alt={r.title} />
+                  
+                  {/* Edit/Delete Buttons logic updated */}
+                  {isOwner && (
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <button onClick={(e) => { e.stopPropagation(); navigate(`/edit-recipe/${r._id}`); }} className="bg-black/70 p-2 rounded-full hover:bg-orange-500">✏️</button>
+                      <button onClick={(e) => handleDelete(e, r._id)} className="bg-black/70 p-2 rounded-full hover:bg-red-500">🗑️</button>
+                    </div>
+                  )}
+                  
+                  <div className="p-5">
+                    <span className="bg-orange-500/10 text-orange-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase">{r.category}</span>
+                    <h3 className="text-xl font-bold mt-2">{r.title}</h3>
+                    <div className="flex justify-between items-center mt-4">
+                      <span className="text-gray-400 text-sm">⏱ {r.time}</span>
+                      <button onClick={() => navigate(`/recipe/${r._id}`)} className="text-orange-500 font-bold">VIEW DETAILS →</button>
+                    </div>
                   </div>
-                )}
-                <div className="p-5">
-                  <span className="bg-orange-500/10 text-orange-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase">{r.category}</span>
-                  <h3 className="text-xl font-bold mt-2">{r.title}</h3>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-gray-400 text-sm">⏱ {r.time}</span>
-                    <button onClick={() => navigate(`/recipe/${r._id}`)} className="text-orange-500 font-bold">VIEW DETAILS →</button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20 bg-[#1f2937] rounded-[3rem] border border-dashed border-gray-700">

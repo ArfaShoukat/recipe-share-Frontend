@@ -19,11 +19,9 @@ const EditRecipe = () => {
   });
 
   useEffect(() => {
-    // Initial fetch ke liye loading toast
     const fetchId = toast.loading("Fetching recipe details...");
-
-    // Sahi:
-fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
+    // Updated: Live API URL used
+    fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("Recipe not found");
         return res.json();
@@ -32,7 +30,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
         if (data) {
           const { owner, _id, __v, ...rest } = data;
           setFormData(rest);
-          toast.dismiss(fetchId); // Data milne par loading khatam
+          toast.dismiss(fetchId);
         }
       })
       .catch(err => {
@@ -47,12 +45,11 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('token');
-    
-    // 2. Update loading toast
     const updateId = toast.loading("Saving changes...");
 
     try {
-      const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
+      // FIX: Localhost changed to Environment Variable
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +65,6 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           description: "Recipe updated successfully! ✨",
           id: updateId
         });
-        
         setTimeout(() => navigate('/recipes'), 1500);
       } else {
         toast.error("Failed to update", {
@@ -87,24 +83,22 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
   };
 
   return (
-    <div className="bg-[#111827] min-h-screen p-8 text-white font-sans">
-      {/* 3. Toaster Container */}
+    <div className="bg-[#111827] min-h-screen p-4 md:p-8 pt-24 text-white font-sans">
       <Toaster position="top-right" richColors theme="dark" closeButton />
-
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto bg-[#1f2937] p-10 rounded-[2.5rem] border border-gray-800 shadow-2xl"
+        className="max-w-4xl mx-auto bg-[#1f2937] p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-800 shadow-2xl"
       >
         <header className="mb-10 text-center">
-          <h2 className="text-4xl font-black mb-2 uppercase tracking-tight">
+          <h2 className="text-2xl md:text-4xl font-black mb-2 uppercase tracking-tight">
             Edit Your <span className="text-orange-500">Recipe</span>
           </h2>
         </header>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Recipe Title</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Recipe Title</label>
             <input 
               type="text" required
               value={formData.title}
@@ -114,7 +108,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Ingredients</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Ingredients</label>
             <textarea 
               rows="4" required
               value={formData.ingredients}
@@ -124,7 +118,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Category</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Category</label>
             <select 
               value={formData.category}
               className="w-full mt-1 p-4 bg-gray-800 rounded-2xl border border-gray-700 outline-none focus:ring-2 ring-orange-500"
@@ -138,7 +132,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Cooking Time</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Cooking Time</label>
             <input 
               type="text" required
               value={formData.time}
@@ -148,7 +142,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Image Link</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Image Link</label>
             <input 
               type="text" required
               value={formData.image}
@@ -158,7 +152,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-sm text-gray-400 ml-1 font-bold uppercase tracking-widest">Preparation Steps</label>
+            <label className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-1">Preparation Steps</label>
             <textarea 
               rows="6" required
               value={formData.instructions}
@@ -172,7 +166,7 @@ fetch(`${process.env.REACT_APP_API_URL}/api/recipes/${id}`)
             whileTap={{ scale: 0.98 }}
             type="submit" 
             disabled={loading}
-            className="md:col-span-2 bg-orange-500 hover:bg-orange-600 py-4 rounded-2xl font-black text-lg shadow-xl uppercase tracking-tighter transition-all disabled:opacity-50"
+            className="md:col-span-2 bg-orange-500 hover:bg-orange-600 py-4 rounded-2xl font-black text-lg shadow-xl uppercase transition-all disabled:opacity-50"
           >
             {loading ? 'Updating...' : 'Save Changes'}
           </motion.button>
